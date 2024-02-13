@@ -1,0 +1,59 @@
+version: '3.3'
+
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    image: photoblog/nginx
+    depends_on:
+      - app
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+    volumes:
+      - ./app/storage:/var/www/app/storage
+    restart: always
+
+  app:
+    build:
+      context: ./app
+      dockerfile: ${PWD}/docker/app/Dockerfile
+    image: photoblog/app
+    depends_on:
+      - prerender
+      - redis
+    volumes:
+      - ./app/storage:/var/www/app/storage
+    restart: always
+
+  app-queue:
+    build:
+      context: ./docker/app-queue
+    image: photoblog/app-queue
+    depends_on:
+      - app
+    volumes:
+      - ./app/storage:/var/www/app/storage
+    restart: always
+
+  app-scheduler:
+    build:
+      context: ./docker/app-scheduler
+    image: photoblog/app-scheduler
+    depends_on:
+      - app
+    volumes:
+      - ./app/storage:/var/www/app/storage
+    restart: always
+
+  prerender:
+    build:
+      context: ./prerender
+      dockerfile: ${PWD}/docker/prerender/Dockerfile
+    image: photoblog/prerender
+    restart: always
+
+  redis:
+    image: redis:4
+    restart: always

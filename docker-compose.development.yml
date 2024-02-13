@@ -1,0 +1,51 @@
+version: '3.3'
+
+services:
+  nginx:
+    volumes:
+      - ./app:/var/www/app
+      - ./docker/nginx/sites:/etc/nginx/conf.d
+    restart: no
+
+  app:
+
+    volumes:
+      - ./app:/var/www/app
+      - ./app/php.ini-development:/usr/local/etc/php/php.ini
+      - ./app/policy.xml:/etc/ImageMagick-6/policy.xml
+    restart: no
+
+  app-queue:
+    volumes:
+      - ./app:/var/www/app
+      - ./app/php.ini-development:/usr/local/etc/php/php.ini
+      - ./app/policy.xml:/etc/ImageMagick-6/policy.xml
+    restart: no
+
+  app-scheduler:
+    volumes:
+      - ./app:/var/www/app
+      - ./app/php.ini-development:/usr/local/etc/php/php.ini
+      - ./app/policy.xml:/etc/ImageMagick-6/policy.xml
+    restart: no
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: 'photo_blog'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_USER: 'dev'
+      MYSQL_PASSWORD: 'dev'
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/mysql/seed:/docker-entrypoint-initdb.d
+      - ./docker/mysql/storage:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    restart: no
+
+  maildev:
+    image: djfarrelly/maildev
+    ports:
+      - 8083:80
+    restart: no
